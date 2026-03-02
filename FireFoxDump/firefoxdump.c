@@ -63,9 +63,6 @@ BOOLEAN SetProfilePathAsWorkingDirectory(_In_ PCHAR ProfilePath, _In_ PWCHAR Fir
     }
 
     BOOLEAN Result = SetCurrentDirectoryW(NewDirectory);
-    if (Result == FALSE) {
-    }
-
     *LineEnd = '\n';
     return Result;
 }
@@ -89,8 +86,6 @@ VOID DumpMozillaCookies() {
         return;
     }
 
-    PrintCookiesBanner();
-
     PCHAR ErrorMessage;
     Result = sqlite3_exec(CookiesDatabase, CookiesSqlQuery, CookiesSqlCallback, 0, &ErrorMessage);
     if (Result != SQLITE_OK) {
@@ -98,36 +93,6 @@ VOID DumpMozillaCookies() {
     }
 
     sqlite3_close_v2(CookiesDatabase);
-}
-
-CONST CHAR BookmarksSqlQuery[] = "SELECT moz_bookmarks.title, moz_places.url FROM moz_bookmarks INNER JOIN moz_places ON moz_bookmarks.fk = moz_places.id;";
-
-INT BookmarksSqlCallback(PVOID NotUsed, INT Argc, PCHAR* Argv, PCHAR* ColumnName) {
-    for (UCHAR Index = 0; Index < Argc; Index++) {
-        wprintf(L"- %hS : %hS\n", ColumnName[Index], Argv[Index]);
-    }
-    wprintf(L"\n");
-    return 0;
-}
-
-VOID DumpMozillaBookmarks() {
-    sqlite3* PlacesDatabase;
-    ULONG Result;
-
-    Result = sqlite3_open_v2("places.sqlite", &PlacesDatabase, SQLITE_OPEN_READONLY, 0);
-    if (Result != SQLITE_OK) {
-        return;
-    }
-
-    PrintBookmarksBanner();
-
-    PCHAR ErrorMessage;
-    Result = sqlite3_exec(PlacesDatabase, BookmarksSqlQuery, BookmarksSqlCallback, 0, &ErrorMessage);
-    if (Result != SQLITE_OK) {
-        sqlite3_free(ErrorMessage);
-    }
-
-    sqlite3_close_v2(PlacesDatabase);
 }
 
 INT main() {
